@@ -104,7 +104,18 @@ function main_menu() {
                 echo "安装依赖并构建项目..."
                 yarn install && yarn build
 
+                # 进入 tracker 目录并设置权限
+                cd ./packages/tracker/
+                echo "设置权限..."
+                sudo chmod 777 docker/data
+                sudo chmod 777 docker/pgdata
+
+                # 启动 Docker Compose
+                echo "启动 Docker Compose..."
+                sudo docker-compose up -d
+                
                 # 构建 Docker 镜像
+                cd cat-token-box/
                 echo "正在构建 Docker 镜像..."
                 sudo docker build -t tracker:latest .
 
