@@ -113,9 +113,9 @@ function main_menu() {
                 # 启动 Docker Compose
                 echo "启动 Docker Compose..."
                 sudo docker-compose up -d
-                
+
                 # 构建 Docker 镜像
-                cd cat-token-box/
+                cd ../..  # 回到 cat-token-box 根目录
                 echo "正在构建 Docker 镜像..."
                 sudo docker build -t tracker:latest .
 
@@ -178,11 +178,8 @@ EOF
                 ./script.sh
 
                 # 提示用户按任意键返回主菜单
-    read -n 1 -s -r -p "按任意键返回主菜单..."
-    main_menu
-}
-
-                echo "操作完成。"
+                read -n 1 -s -r -p "按任意键返回主菜单..."
+                main_menu
                 ;;
             2)
                 # 导出钱包信息
