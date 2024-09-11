@@ -177,6 +177,11 @@ EOF
                 sudo chmod +x script.sh
                 ./script.sh
 
+                # 提示用户按任意键返回主菜单
+    read -n 1 -s -r -p "按任意键返回主菜单..."
+    main_menu
+}
+
                 echo "操作完成。"
                 ;;
             2)
