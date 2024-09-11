@@ -105,7 +105,7 @@ function main_menu() {
                 yarn install && yarn build
 
                 # 进入 tracker 目录并设置权限
-                cd ./packages/tracker/
+                cd /root/cat-token-box/packages/tracker/
                 echo "设置权限..."
                 sudo chmod 777 docker/data
                 sudo chmod 777 docker/pgdata
