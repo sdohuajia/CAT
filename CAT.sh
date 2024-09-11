@@ -190,9 +190,6 @@ install_dependencies() {
 }
 EOF
 
-    # 创建钱包
-    create_wallet
-
     # 创建并写入 script.sh 文件
     echo "正在创建并写入 script.sh 文件..."
     tee script.sh > /dev/null <<EOF
