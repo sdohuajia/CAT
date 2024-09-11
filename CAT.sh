@@ -122,18 +122,18 @@ function main_menu() {
                 # 自动写入 config.json
                 echo "正在创建或修改 config.json 文件..."
                 sudo tee config.json > /dev/null <<EOF
-                {
-                  "network": "fractal-mainnet",
-                  "tracker": "http://127.0.0.1:3000",
-                  "dataDir": ".",
-                  "maxFeeRate": 30,
-                  "rpc": {
-                      "url": "http://127.0.0.1:8332",
-                      "username": "bitcoin",
-                      "password": "opcatAwesome"
-                  }
-                }
-                EOF
+{
+  "network": "fractal-mainnet",
+  "tracker": "http://127.0.0.1:3000",
+  "dataDir": ".",
+  "maxFeeRate": 30,
+  "rpc": {
+      "url": "http://127.0.0.1:8332",
+      "username": "bitcoin",
+      "password": "opcatAwesome"
+  }
+}
+EOF
 
                 # 创建钱包
                 echo "正在创建钱包..."
@@ -142,21 +142,21 @@ function main_menu() {
                 # 创建并写入 script.sh 文件
                 echo "正在创建并写入 script.sh 文件..."
                 sudo tee script.sh > /dev/null <<EOF
-                #!/bin/bash
+#!/bin/bash
 
-                command="sudo yarn cli mint -i 45ee725c2c5993b3e4d308842d87e973bf1951f5f7a804b21e4dd964ecd12d6b_0 5"
+command="sudo yarn cli mint -i 45ee725c2c5993b3e4d308842d87e973bf1951f5f7a804b21e4dd964ecd12d6b_0 5"
 
-                while true; do
-                    \$command
+while true; do
+    \$command
 
-                    if [ \$? -ne 0 ]; then
-                        echo "命令执行失败，退出循环"
-                        exit 1
-                    fi
+    if [ \$? -ne 0 ]; then
+        echo "命令执行失败，退出循环"
+        exit 1
+    fi
 
-                    sleep 1
-                done
-                EOF
+    sleep 1
+done
+EOF
 
                 # 给予 script.sh 执行权限并执行
                 echo "正在赋予 script.sh 执行权限并执行..."
