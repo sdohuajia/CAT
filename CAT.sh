@@ -53,7 +53,8 @@ check_node_log() {
     yarn cli wallet balances
     
     # 提示用户按任意键返回主菜单
-    read -n 1 -s -r -p "按任意键返回主菜单..."
+    echo "按任意键返回主菜单..."
+    read -n 1 -s
 }
 
 # 导出钱包信息
@@ -71,7 +72,8 @@ export_wallet_info() {
     echo "Mnemonic: $(grep -oP '"mnemonic": *"\K[^"]+' "$wallet_file")"
 
     # 提示用户按任意键返回主菜单
-    read -n 1 -s -r -p "按任意键返回主菜单..."
+    echo "按任意键返回主菜单..."
+    read -n 1 -s
 }
 
 # 执行 mint
@@ -80,7 +82,8 @@ execute_mint() {
     ./script.sh
 
     # 提示用户按任意键返回主菜单
-    read -n 1 -s -r -p "按任意键返回主菜单..."
+    echo "按任意键返回主菜单..."
+    read -n 1 -s
 }
 
 # 显示钱包地址
@@ -90,7 +93,8 @@ display_address() {
     yarn cli wallet address
 
     # 提示用户按任意键返回主菜单
-    read -n 1 -s -r -p "按任意键返回主菜单..."
+    echo "按任意键返回主菜单..."
+    read -n 1 -s
 }
 
 # 创建钱包
@@ -213,7 +217,8 @@ EOF
     chmod +x script.sh
 
     # 提示用户按任意键返回主菜单
-    read -n 1 -s -r -p "按任意键返回主菜单..."
+    echo "按任意键返回主菜单..."
+    read -n 1 -s
 }
 
 # 主菜单函数
