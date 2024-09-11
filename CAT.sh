@@ -51,6 +51,9 @@ install_docker_compose() {
 check_node_log() {
     echo "正在查看同步日志和余额..."
     yarn cli wallet balances
+    
+    # 提示用户按任意键返回主菜单
+    read -n 1 -s -r -p "按任意键返回主菜单..."
 }
 
 # 导出钱包信息
@@ -66,6 +69,9 @@ export_wallet_info() {
     echo "钱包信息:"
     echo "Name: $(grep -oP '"name": *"\K[^"]+' "$wallet_file")"
     echo "Mnemonic: $(grep -oP '"mnemonic": *"\K[^"]+' "$wallet_file")"
+
+    # 提示用户按任意键返回主菜单
+    read -n 1 -s -r -p "按任意键返回主菜单..."
 }
 
 # 执行 mint
@@ -82,6 +88,9 @@ display_address() {
     echo "显示钱包地址..."
     cd /root/cat-token-box/packages/cli || { echo "进入目录失败"; exit 1; }
     yarn cli wallet address
+
+    # 提示用户按任意键返回主菜单
+    read -n 1 -s -r -p "按任意键返回主菜单..."
 }
 
 # 创建钱包
