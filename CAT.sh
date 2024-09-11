@@ -101,7 +101,7 @@ create_wallet() {
 }
 
 # 安装节点
-install_node() {
+install_dependencies() {
     echo "开始安装节点..."
     
     # 检查 Docker 是否已安装
@@ -236,7 +236,7 @@ main_menu() {
 
         case $option in
             1)
-                install_node
+                install_dependencies
                 ;;
             2)
                 export_wallet_info
