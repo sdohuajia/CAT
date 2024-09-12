@@ -47,10 +47,10 @@ install_docker_compose() {
     echo "Docker Compose 已成功安装。"
 }
 
-# 查看同步日志和余额
+# 查看同步日志
 check_node_log() {
-    echo "查看同步日志和余额..."
-    yarn cli wallet balances
+    echo "查看同步日志..."
+    docker logs -f --tail 100 tracker
     
     echo "按任意键返回主菜单..."
     read -n 1 -s
@@ -215,7 +215,7 @@ main_menu() {
         echo "2) 创建钱包"
         echo "3) 导出钱包"
         echo "4) 执行 mint"
-        echo "5) 查看同步日志和余额"
+        echo "5) 查看同步日志"
         echo "6) 显示地址"
         echo "7) 退出"
 
