@@ -154,19 +154,34 @@ install_dependencies() {
     docker build -t tracker:latest .
 
     echo "运行 Docker 容器..."
-    docker run -d \
-        --name tracker \
-        --add-host="host.docker.internal:host-gateway" \
-        -e DATABASE_HOST="host.docker.internal" \
-        -e RPC_HOST="host.docker.internal" \
-        -p 3000:3000 \
-        tracker:latest
+docker run -d \
+    --name tracker \
+    --add-host="host.docker.internal:host-gateway" \
+    -e DATABASE_HOST="host.docker.internal" \
+    -e RPC_HOST="host.docker.internal" \
+    -p 3000:3000 \
+    tracker:latest
 
-    cd packages/cli || { echo "进入 CLI 目录失败"; exit 1; }
-    echo "已进入目录 /root/cat-token-box/packages/cli"
+# 修改 /root/cat-token-box/packages/tracker/.env 文件
+cd /root/cat-token-box/packages/tracker || { echo "进入目录失败"; exit 1; }
 
-    echo "创建或修改 config.json 文件..."
-    cat <<EOF > config.json
+read -p "请输入 RPC 用户名 (默认: bitcoin): " rpc_user
+rpc_user=${rpc_user:-bitcoin}
+
+read -p "请输入 RPC 密码 (默认: opcatAwesome): " rpc_password
+rpc_password=${rpc_password:-opcatAwesome}
+
+# 写入 .env 文件
+cat <<EOF > .env
+RPC_USER=$rpc_user
+RPC_PASSWORD=$rpc_password
+EOF
+
+echo ".env 文件已更新。"
+
+# 更新 config.json 文件
+cd /root/cat-token-box/packages/cli || { echo "进入目录失败"; exit 1; }
+cat <<EOF > config.json
 {
   "network": "fractal-mainnet",
   "tracker": "http://127.0.0.1:3000",
@@ -174,8 +189,8 @@ install_dependencies() {
   "maxFeeRate": 30,
   "rpc": {
       "url": "http://127.0.0.1:8332",
-      "username": "bitcoin",
-      "password": "opcatAwesome"
+      "username": "$rpc_user",
+      "password": "$rpc_password"
   }
 }
 EOF
