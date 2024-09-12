@@ -10,6 +10,12 @@ if [ "$(id -u)" -ne "0" ]; then
     exit 1
 fi
 
+# 默认配置
+DOCKER_COMPOSE_VERSION="2.20.2"
+NODE_VERSION="16.x"
+WALLET_FILE="/root/cat-token-box/packages/cli/wallet.json"
+REPO_URL="https://github.com/CATProtocol/cat-token-box.git"
+
 # 安装 Docker
 install_docker() {
     echo "开始安装 Docker..."
@@ -31,7 +37,7 @@ install_docker() {
 install_node() {
     echo "开始安装 Node.js..."
     apt-get update -q
-    curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+    curl -fsSL https://deb.nodesource.com/setup_$NODE_VERSION | bash -
     apt-get install -yq nodejs
 
     echo "Node.js 已成功安装。"
@@ -39,9 +45,8 @@ install_node() {
 
 # 安装 Docker Compose
 install_docker_compose() {
-    local version="2.20.2"
-    echo "开始安装 Docker Compose (版本 $version)..."
-    curl -L "https://github.com/docker/compose/releases/download/v$version/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    echo "开始安装 Docker Compose (版本 $DOCKER_COMPOSE_VERSION)..."
+    curl -L "https://github.com/docker/compose/releases/download/v$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
 
     echo "Docker Compose 已成功安装。"
@@ -50,7 +55,7 @@ install_docker_compose() {
 # 查看同步日志
 check_node_log() {
     echo "查看同步日志..."
-    cd /root/cat-token-box/packages/cli
+    cd /root/cat-token-box/packages/cli || { echo "目录不存在"; exit 1; }
     yarn cli wallet balances
     
     echo "按任意键返回主菜单..."
@@ -60,16 +65,15 @@ check_node_log() {
 # 导出钱包信息
 export_wallet_info() {
     echo "导出钱包信息..."
-    wallet_file="/root/cat-token-box/packages/cli/wallet.json"
-
-    if [ ! -f "$wallet_file" ]; then
-        echo "钱包文件 $wallet_file 不存在。"
+    
+    if [ ! -f "$WALLET_FILE" ]; then
+        echo "钱包文件 $WALLET_FILE 不存在。"
         exit 1
     fi
 
     echo "钱包信息:"
-    echo "Name: $(grep -oP '"name": *"\K[^"]+' "$wallet_file")"
-    echo "Mnemonic: $(grep -oP '"mnemonic": *"\K[^"]+' "$wallet_file")"
+    echo "Name: $(grep -oP '"name": *"\K[^"]+' "$WALLET_FILE")"
+    echo "Mnemonic: $(grep -oP '"mnemonic": *"\K[^"]+' "$WALLET_FILE")"
 
     echo "按任意键返回主菜单..."
     read -n 1 -s
@@ -78,9 +82,13 @@ export_wallet_info() {
 # 执行 mint
 execute_mint() {
     echo "执行 mint 操作..."
-    cd /root/cat-token-box/packages/cli
+    cd /root/cat-token-box/packages/cli || { echo "进入目录失败"; exit 1; }
     chmod +x script.sh
     ./script.sh
+
+    # 注释掉指定的代码行
+    echo "注释掉指定的代码行..."
+    sed -i 's/await this.merge(token, address);/\/\/ await this.merge(token, address);/' /root/cat-token-box/packages/cli/src/commands/mint/mint.command.ts
 
     echo "按任意键返回主菜单..."
     read -n 1 -s
@@ -135,7 +143,7 @@ install_dependencies() {
     docker-compose --version
 
     echo "克隆 GitHub 仓库..."
-    git clone https://github.com/CATProtocol/cat-token-box.git || { echo "克隆失败"; exit 1; }
+    git clone "$REPO_URL" || { echo "克隆失败"; exit 1; }
     cd cat-token-box/ || { echo "进入目录失败"; exit 1; }
 
     echo "安装依赖并构建项目..."
@@ -150,39 +158,39 @@ install_dependencies() {
     echo "启动 Docker Compose..."
     docker-compose up -d
 
-    cd ../..
+    cd ../.. || { echo "返回上级目录失败"; exit 1; }
     echo "构建 Docker 镜像..."
     docker build -t tracker:latest .
 
     echo "运行 Docker 容器..."
-docker run -d \
-    --name tracker \
-    --add-host="host.docker.internal:host-gateway" \
-    -e DATABASE_HOST="host.docker.internal" \
-    -e RPC_HOST="host.docker.internal" \
-    -p 3000:3000 \
-    tracker:latest
+    docker run -d \
+        --name tracker \
+        --add-host="host.docker.internal:host-gateway" \
+        -e DATABASE_HOST="host.docker.internal" \
+        -e RPC_HOST="host.docker.internal" \
+        -p 3000:3000 \
+        tracker:latest
 
-# 修改 /root/cat-token-box/packages/tracker/.env 文件
-cd /root/cat-token-box/packages/tracker || { echo "进入目录失败"; exit 1; }
+    # 修改 /root/cat-token-box/packages/tracker/.env 文件
+    cd /root/cat-token-box/packages/tracker || { echo "进入目录失败"; exit 1; }
 
-read -p "请输入 RPC 用户名 (默认: bitcoin): " rpc_user
-rpc_user=${rpc_user:-bitcoin}
+    read -p "请输入 RPC 用户名 (默认: bitcoin): " rpc_user
+    rpc_user=${rpc_user:-bitcoin}
 
-read -p "请输入 RPC 密码 (默认: opcatAwesome): " rpc_password
-rpc_password=${rpc_password:-opcatAwesome}
+    read -p "请输入 RPC 密码 (默认: opcatAwesome): " rpc_password
+    rpc_password=${rpc_password:-opcatAwesome}
 
-# 写入 .env 文件
-cat <<EOF > .env
+    # 写入 .env 文件
+    cat <<EOF > .env
 RPC_USER=$rpc_user
 RPC_PASSWORD=$rpc_password
 EOF
 
-echo ".env 文件已更新。"
+    echo ".env 文件已更新。"
 
-# 更新 config.json 文件
-cd /root/cat-token-box/packages/cli || { echo "进入目录失败"; exit 1; }
-cat <<EOF > config.json
+    # 更新 config.json 文件
+    cd /root/cat-token-box/packages/cli || { echo "进入目录失败"; exit 1; }
+    cat <<EOF > config.json
 {
   "network": "fractal-mainnet",
   "tracker": "http://127.0.0.1:3000",
@@ -259,7 +267,7 @@ main_menu() {
                 display_address
                 ;;
             7)
-                echo "退出脚本。"
+                echo "退出脚本..."
                 exit 0
                 ;;
             *)
