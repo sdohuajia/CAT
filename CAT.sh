@@ -77,6 +77,7 @@ export_wallet_info() {
 # 执行 mint
 execute_mint() {
     echo "执行 mint 操作..."
+    cd /root/cat-token-box/packages/cli
     ./script.sh
 
     echo "按任意键返回主菜单..."
