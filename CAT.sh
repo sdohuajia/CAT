@@ -55,8 +55,7 @@ install_docker_compose() {
 # 查看同步日志
 check_node_log() {
     echo "查看同步日志..."
-    cd /root/cat-token-box/packages/cli || { echo "目录不存在"; exit 1; }
-    yarn cli wallet balances
+    docker logs -f --tail 100 tracker
     
     echo "按任意键返回主菜单..."
     read -n 1 -s
