@@ -252,6 +252,26 @@ EOF
     read -n 1 -s
 }
 
+# 节点同步错误重启
+restart_sync() {
+    echo "开始重启节点同步相关服务..."
+    
+    # 停止 PostgreSQL 服务
+    sudo systemctl stop postgresql
+    echo "PostgreSQL 服务已停止。"
+
+    # 启动 Docker 容器 tracker-postgres-1
+    docker start tracker-postgres-1
+    echo "Docker 容器 tracker-postgres-1 已启动。"
+
+    # 重启 Docker 容器 tracker
+    docker restart tracker
+    echo "Docker 容器 tracker 已重启。"
+
+    echo "节点同步错误重启完成。按任意键返回主菜单..."
+    read -n 1 -s
+}
+
 # 主菜单函数
 main_menu() {
     while true; do
@@ -267,7 +287,8 @@ main_menu() {
         echo "4) 执行 mint"
         echo "5) 查看同步日志"
         echo "6) 显示地址"
-        echo "7) 退出"
+        echo "7) 节点同步错误重启"
+        echo "8) 退出"
 
         read -p "请输入选项: " option
 
@@ -291,6 +312,9 @@ main_menu() {
                 display_address
                 ;;
             7)
+                restart_sync
+                ;;
+            8)
                 echo "退出脚本..."
                 exit 0
                 ;;
