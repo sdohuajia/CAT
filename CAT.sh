@@ -16,6 +16,22 @@ NODE_VERSION="16.x"
 WALLET_FILE="/root/cat-token-box/packages/cli/wallet.json"
 REPO_URL="https://github.com/CATProtocol/cat-token-box.git"
 
+# 检查 PostgreSQL 是否安装
+install_postgresql() {
+    if ! command -v psql &> /dev/null; then
+        echo "PostgreSQL 未安装，开始安装..."
+        sudo apt update
+        sudo apt install -y postgresql postgresql-contrib
+        sudo systemctl start postgresql
+        sudo systemctl enable postgresql
+        sudo systemctl status postgresql
+        sudo -i -u postgres psql -c "\password postgres"
+        echo "PostgreSQL 已成功安装。"
+    else
+        echo "PostgreSQL 已安装，跳过安装步骤。"
+    fi
+}
+
 # 安装 Docker
 install_docker() {
     echo "开始安装 Docker..."
@@ -81,8 +97,35 @@ export_wallet_info() {
 # 执行 mint
 execute_mint() {
     echo "执行 mint 操作..."
-    cd /root/cat-token-box/packages/cli || { echo "进入目录失败"; exit 1; }
+
+    # 提示用户输入交易 ID 和 gas 费用
+    read -p "请输入交易 ID (例如 45ee725c2c5993b3e4d308842d87e973bf1951f5f7a804b21e4dd964ecd12d6b_0): " transaction_id
+    read -p "请输入 gas 费用 (默认: 2): " fee_rate
+    fee_rate=${fee_rate:-2}  # 如果用户未输入，默认设置为 2
+
+    # 创建并写入 script.sh 文件
+    echo "创建并写入 script.sh 文件..."
+    cat <<EOF > script.sh
+#!/bin/bash
+
+command="yarn cli mint -i $transaction_id 5 --fee-rate $fee_rate"
+
+while true; do
+    \$command
+
+    if [ \$? -ne 0 ];then
+        echo "命令执行失败，退出循环"
+        exit 1
+    fi
+
+    sleep 1
+done
+EOF
+
     chmod +x script.sh
+
+    # 进入指定目录并执行 script.sh
+    cd /root/cat-token-box/packages/cli || { echo "进入目录失败"; exit 1; }
     ./script.sh
 
     # 注释掉指定的代码行
@@ -116,7 +159,7 @@ create_wallet() {
 # 安装节点
 install_dependencies() {
     echo "开始安装节点..."
-    
+
     if ! command -v docker &> /dev/null; then
         install_docker
     else
@@ -134,6 +177,8 @@ install_dependencies() {
     else
         echo "Docker Compose 已安装，跳过安装步骤。"
     fi
+
+    install_postgresql  # 添加 PostgreSQL 安装检查
 
     echo "Docker 状态:"
     systemctl status docker --no-pager
@@ -202,26 +247,6 @@ EOF
   }
 }
 EOF
-
-    echo "创建并写入 script.sh 文件..."
-    cat <<EOF > script.sh
-#!/bin/bash
-
-command="yarn cli mint -i 45ee725c2c5993b3e4d308842d87e973bf1951f5f7a804b21e4dd964ecd12d6b_0 5"
-
-while true; do
-    \$command
-
-    if [ \$? -ne 0 ]; then
-        echo "命令执行失败，退出循环"
-        exit 1
-    fi
-
-    sleep 1
-done
-EOF
-
-    chmod +x script.sh
 
     echo "按任意键返回主菜单..."
     read -n 1 -s
